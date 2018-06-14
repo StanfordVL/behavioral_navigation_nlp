@@ -22,13 +22,13 @@ EXPERIMENTS_DIR = os.path.join(MAIN_DIR, "experiments") # relative path of exper
 
 # High-level options
 tf.app.flags.DEFINE_integer("gpu", 0, "Which GPU to use, if you have multiple.")
-tf.app.flags.DEFINE_string("mode", "train", "Available modes: train / show_examples / official_eval")
+tf.app.flags.DEFINE_string("mode", "train", "Available modes: train / show_examples / official_eval / show_attention")
 tf.app.flags.DEFINE_string("experiment_name", "", "Unique name for your experiment. This will create a directory by this name in the experiments/ directory, which will hold all data related to this experiment")
 tf.app.flags.DEFINE_integer("num_epochs", 0, "Number of epochs to train. 0 means train indefinitely")
 tf.app.flags.DEFINE_boolean("use_raw_graph", False, "Use vectors in unit of triplets to represent graph")
 tf.app.flags.DEFINE_boolean("use_bidaf", False, "Use BiDAF attention, otherwise multiplicative attention")
 tf.app.flags.DEFINE_boolean("show_start_tokens", False, "Whether to explicitly append start positions in graph.")
-tf.app.flags.DEFINE_boolean("schedule_embed", False, "Whether to scheduled training in decoder's training stage.")
+tf.app.flags.DEFINE_boolean("schedule_embed", True, "Whether to scheduled training in decoder's training stage.")
 tf.app.flags.DEFINE_float("sampling_prob", 0.0, "the probability of sampling categorically from the output ids instead of reading directly from the inputs")
 tf.app.flags.DEFINE_string("pred_method", "greedy", "Available sampling method in decoder's test time: greedy / sample / beam")
 
@@ -43,7 +43,7 @@ tf.app.flags.DEFINE_float("sampling_prob_decay_steps", 100,
 # Hyperparameters
 tf.app.flags.DEFINE_float("learning_rate", 0.001, "Learning rate.")
 tf.app.flags.DEFINE_float("max_gradient_norm", 5.0, "Clip gradients to this norm.")
-tf.app.flags.DEFINE_float("dropout", 0.4, "Fraction of units randomly dropped on non-recurrent connections.")
+tf.app.flags.DEFINE_float("dropout", 0.5, "Fraction of units randomly dropped on non-recurrent connections.")
 tf.app.flags.DEFINE_integer("batch_size", 128, "Batch size to use")
 tf.app.flags.DEFINE_integer("hidden_size", 128, "Size of the hidden states")
 tf.app.flags.DEFINE_integer("context_len", 300, "The maximum context length of your model")
@@ -157,8 +157,8 @@ def main(unused_argv):
         logging.getLogger().addHandler(file_handler)
 
         # Save a record of flags as a .json file in train_dir
-        with open(os.path.join(FLAGS.train_dir, "flags.json"), 'w') as fout:
-            json.dump(FLAGS(sys.argv), fout)
+        # with open(os.path.join(FLAGS.train_dir, "flags.json"), 'w') as fout:
+        #     json.dump(FLAGS(sys.argv), fout)
 
         # Make bestmodel dir if necessary
         if not os.path.exists(bestmodel_dir):
@@ -185,7 +185,7 @@ def main(unused_argv):
                                            num_samples=FLAGS.print_num, print_to_screen=True)#, summary_writer=summary_writer)
             # summary_writer.close()
 
-    elif FLAGS.mode == "demo":
+    elif FLAGS.mode == "show_attention":
         """ To show a few examples of attention map.
         """
         with tf.Session(config=config) as sess:
