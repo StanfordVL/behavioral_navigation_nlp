@@ -3,6 +3,7 @@
 Xiaoxue Zang*, Ashwini Pokle*, Marynel Vázquez, Kevin Chen, Juan Carlos Niebles, Alvaro Soto, Silvio Savarese
 * [Project Page]()
 * [Paper]()
+* [Dataset](https://stanford.box.com/shared/static/ye2z4zhsdm0mtc9kf44yjar7j9a5nuc3.zip)
 
 *\* equal contribution.*
 ## Setup
@@ -55,4 +56,6 @@ python codes/main.py --train_dir experiments/my_experiment --mode=official_eval 
 
 
 # Acknowledgement
+Toyota Research Institute ("TRI")  provided funds to assist the authors with their research but this article solely reflects the opinions and conclusions of its authors and not TRI or any other Toyota entity.
+
 *code modified from the Default Final Project for CS224n, Winter 2018*
