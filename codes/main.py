@@ -67,7 +67,7 @@ tf.app.flags.DEFINE_string("data_dir", DEFAULT_DATA_DIR, "Where to find preproce
 tf.app.flags.DEFINE_string("ckpt_load_dir", "", "For official_eval mode, which directory to load the checkpoint fron. You need to specify this for official_eval mode.")
 tf.app.flags.DEFINE_string("file_in_path", "dev", "For official_eval mode, evaluate which data choose from dev or test")
 tf.app.flags.DEFINE_string("file_out_path", "predictions.txt", "Output path for official_eval mode. Defaults to predictions.txt")
-tf.app.flags.DEFINE_boolean("write_out", False, "write out the prediction to file.")
+tf.app.flags.DEFINE_boolean("write_out", True, "write out the prediction to file.")
 
 FLAGS = tf.app.flags.FLAGS
 os.environ["CUDA_VISIBLE_DEVICES"] = str(FLAGS.gpu)

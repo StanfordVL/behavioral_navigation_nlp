@@ -201,9 +201,9 @@ class QAModel(object):
             if self.FLAGS.pred_method == 'beam':
                 self.dev_logits = tf.Print(self.dev_logits[:, :, 0], [tf.shape(self.dev_logit), self.dev_logits[0, :, 0]])
                 self.dev_loss = tf.cast(self.dev_logits[0, 0], tf.float32)
-                return  
+                return
             dev_logits_len = tf.to_int32(tf.shape(self.dev_logits)[1])
-            weights = tf.concat([weights[:, 1:], tf.fill([batch_size, 1], 0.0)], 1) 
+            weights = tf.concat([weights[:, 1:], tf.fill([batch_size, 1], 0.0)], 1)
             self.dev_loss = tf.contrib.seq2seq.sequence_loss(
                 self.dev_logits, self.new_ans_ids[:, :dev_logits_len],
                 weights=weights[:, :dev_logits_len])
@@ -472,6 +472,8 @@ class QAModel(object):
                 pred_ids, confidence_score, ans_str = verify_route(start_ids, pred_logits, batch.context_tokens,
                                                                    self.ans2id, self.id2ans, self.FLAGS.answer_len)
 
+            f1_scores, em_scores, ed_scores, gm_scores = [], [], [], []
+
             pred_ids = pred_ids.tolist()  # the output of using test network
             for ex_idx, (pred_ans_list, true_ans_tokens) in enumerate(
                     zip(pred_ids, list(batch.ans_tokens))):
@@ -488,12 +490,17 @@ class QAModel(object):
                 true_answer = " ".join(true_ans_tokens[:])
 
                 # Calculate metrics
-                f1, em, edit_dist, rough_em = compute_all_metrics(pred_ans_tokens, true_ans_tokens)
+                f1, em, edit_dist, goal_match = compute_all_metrics(pred_ans_tokens, true_ans_tokens)
+                f1_scores.append(f1)
+                em_scores.append(em)
+                ed_scores.append(edit_dist)
+                gm_scores.append(goal_match)
 
                 f1_total += f1
+
                 em_total += em
                 ed_total += edit_dist
-                rough_em_total += rough_em
+                rough_em_total += goal_match
                 ans_list.append(pred_answer)
                 graph_route_info.append((str(int(graph_length[ex_idx])), str(len(true_ans_tokens[1:-1])), str(int(em))))
 
@@ -521,6 +528,27 @@ class QAModel(object):
                 for line, extra_info in zip(ans_list, graph_route_info):
                     f.write(line + " " + " ".join(extra_info) + '\n')
             print("Wrote predictions to %s" % file_out)
+
+            em_file = "em_" + str(file_out)
+            logging.info("Writing EM scores to {}".format(em_file))
+            with open(em_file, 'w') as f:
+                for em in em_scores:
+                    f.write(str(em) + '\n')
+            print("Wrote EM Scores to %s" % em_file)
+
+            ed_file = "ed_" + str(file_out)
+            logging.info("Writing ED scores to {}".format(ed_file))
+            with open(ed_file, 'w') as f:
+                for ed in ed_scores:
+                    f.write(str(ed) + '\n')
+            print("Wrote ED Scores to %s" % ed_file)
+
+            gm_file = "gm_" + str(file_out)
+            logging.info("Writing GM scores to {}".format(gm_file))
+            with open(gm_file, 'w') as f:
+                for gm in gm_scores:
+                    f.write(str(gm) + '\n')
+            print("Wrote GM Scores to %s" % gm_file)
 
         return f1_total, em_total, ed_total, rough_em_total
 
